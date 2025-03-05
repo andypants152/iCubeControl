@@ -4,7 +4,8 @@
   "description": "3D8RGB Controller",
   "main": "main.js",
   "scripts": {
-    "build": "parcel build ./build/index.html"
+    "start": "webpack serve",
+    "build": "webpack"
   },
   "repository": {
     "type": "git",
@@ -15,12 +16,19 @@
   "bugs": {
     "url": "https://github.com/andypants152/iCubeControl/issues"
   },
-  "homepage": "https://github.com/andypants152/iCubeControl#readme",
-  "devDependencies": {
-    "parcel": "^2.13.3"
-  },
+  "homepage": "https://github.com/iCubeControl",
   "dependencies": {
-    "@material/web": "^2.2.0",
+    "@shoelace-style/shoelace": "^2.20.0",
+    "copy-webpack-plugin": "^13.0.0",
+    "style-loader": "^4.0.0",
     "three": "^0.173.0"
+  },
+  "devDependencies": {
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.3",
+    "mini-css-extract-plugin": "^2.9.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.0"
   }
 }

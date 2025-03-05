@@ -1,5 +1,18 @@
 // main.js
+
+import './styles.css';
+import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
+setBasePath('/shoelace');
+import '@shoelace-style/shoelace/dist/themes/light.css';
+import '@shoelace-style/shoelace/dist/themes/dark.css';
+import '@shoelace-style/shoelace/dist/shoelace.js';
+
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+const colorPicker = document.querySelector('.palette');
+let camera, scene, renderer;
+let controls;
+
 let port = null;
 let reader = null;
 
@@ -151,7 +164,7 @@ async function toggleConnection() {
   }
 }
 
-function sendData() {
+function sendCubeData() {
   console.log("Sending data...");
   // Implement data sending logic
 }
@@ -161,40 +174,105 @@ function readCubeData() {
   // Implement data reading logic
 }
 
+function initThreeJS() {
+  const container = document.getElementById('threejs-container');
+
+  // Scene
+  scene = new THREE.Scene();
+
+  // Camera
+  camera = new THREE.PerspectiveCamera(
+    75,
+    container.clientWidth / container.clientHeight,
+    0.1,
+    1000
+  );
+  camera.position.set(10, 10, 10); // So we can see the grid
+
+  // Renderer
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  container.appendChild(renderer.domElement);
+
+  // OrbitControls
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.07;
+  // By default:
+  //  - LEFT mouse rotates
+  //  - MIDDLE mouse zooms
+  //  - RIGHT mouse pans
+
+  // Create 8×8×8 small cubes
+  const boxes = [];
+  for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < 8; y++) {
+      for (let z = 0; z < 8; z++) {
+        const geometry = new THREE.BoxGeometry(0.4, 0.4, 0.4);
+        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const cube = new THREE.Mesh(geometry, material);
+
+        // Position them around the origin in a cubic formation
+        cube.position.set(
+          x - 3.5,
+          y - 3.5,
+          z - 3.5
+        );
+        scene.add(cube);
+        boxes.push(cube);
+      }
+    }
+  }
+
+  // left-click to color a cube
+  // We'll do pointerdown so we can check e.button
+  renderer.domElement.addEventListener('pointerdown', (e) => {
+    // Only handle left click
+    if (e.button !== 0) return; 
+
+    // Convert click coords to normalized device coords
+    const mouse = new THREE.Vector2(
+      (e.clientX / renderer.domElement.clientWidth) * 2 - 1,
+      -(e.clientY / renderer.domElement.clientHeight) * 2 + 1
+    );
+
+    const raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(boxes);
+
+    if (intersects.length > 0) {
+      // Use the first object we hit
+      const hitCube = intersects[0].object;
+      // Use the Shoelace color picker's value as the color
+      hitCube.material.color.set(colorPicker.value);
+    }
+  });
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update(); // let OrbitControls apply damping, rotation, etc.
+  renderer.render(scene, camera);
+}
+
 //once everything is loaded
 document.addEventListener("DOMContentLoaded", () => {
 
   const connectButton = document.getElementById("connect-btn");
-  const sendButton = document.getElementById("send-btn");
-  const readCubeButton = document.getElementById("read-cube-btn");
+  const disconnectButton = document.getElementById("disconnect-btn");
+  const sendButton = document.getElementById('send-btn');
+  const receiveButton = document.getElementById('receive-btn');
 
   if (connectButton) {
     connectButton.addEventListener("click", toggleConnection);
   }
   if (sendButton) {
-    sendButton.addEventListener("click", sendData);
+    sendButton.addEventListener("click", sendCubeData);
   }
-  if (readCubeButton) {
-    readCubeButton.addEventListener("click", readCubeData);
+  if (receiveButton) {
+    receiveButton.addEventListener("click", readCubeData);
   }
 
-  const container = document.getElementById('threejs-container');
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-  const renderer = new THREE.WebGLRenderer();
-  renderer.setSize(container.clientWidth, container.clientHeight);
-  container.appendChild(renderer.domElement);
-
-  const geometry = new THREE.BoxGeometry(1, 1, 1);
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
-
-  camera.position.z = 5;
-  function animate() {
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
-    renderer.render(scene, camera);
-  }
-  renderer.setAnimationLoop(animate);
+  initThreeJS();
+  animate();
 });  
