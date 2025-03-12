@@ -41,3 +41,16 @@ body {
     height: 100%;
     /* Or at least give it some height if you want something else */
   }
+
+  sl-button#connect-btn::part(base) {
+    background-color: #329900;
+  }
+  sl-button#disconnect-btn::part(base) {
+    background-color: #e10916;
+  }
+  sl-button#receive-btn::part(base) {
+    background-color: #010099;
+  }
+  sl-button#send-btn::part(base) {
+    background-color: #F5B201;
+  }
