@@ -1,43 +1,44 @@
+////////////////////////////////////////////////
 // main.js
+////////////////////////////////////////////////
 
 import './styles.css';
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js';
 setBasePath('/shoelace');
+
+// Shoelace themes
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import '@shoelace-style/shoelace/dist/themes/dark.css';
 import '@shoelace-style/shoelace/dist/shoelace.js';
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-const colorPicker = document.querySelector('.palette');
-let camera, scene, renderer;
-let controls;
 
+// Grabbing the color picker (assuming .palette is the class in your HTML)
+const colorPicker = document.querySelector('.palette');
+
+// For Serial usage
 let port = null;
 let reader = null;
 
-// Function to request and open the serial port.
+////////////////////////////////////////////////
+// Web Serial Functions (unchanged)
+////////////////////////////////////////////////
+
 async function connectSerial() {
   if (!("serial" in navigator)) {
     console.error("Web Serial API not supported in this browser.");
     return false;
   }
-
   try {
-    // Request the serial port from the user.
     port = await navigator.serial.requestPort();
-
-    // Open the port with the specified baud rate.
     await port.open({ baudRate: 115200 });
     console.log("Port opened!");
 
-    // Create a TextDecoderStream to convert incoming bytes into text.
     const textDecoder = new TextDecoderStream();
-    // Pipe the port's readable stream into the decoder.
     const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
     reader = textDecoder.readable.getReader();
 
-    // Return true immediately after opening the port
     startReading();
     return true;
   } catch (error) {
@@ -46,7 +47,6 @@ async function connectSerial() {
   }
 }
 
-// Function to continuously read data from the serial port
 async function startReading() {
   try {
     while (port && port.readable) {
@@ -62,7 +62,6 @@ async function startReading() {
   } catch (error) {
     console.error("Error reading from serial port:", error);
   } finally {
-    // Clean up on disconnect
     if (reader) {
       reader.releaseLock();
       reader = null;
@@ -71,21 +70,16 @@ async function startReading() {
       await port.close();
       port = null;
     }
-    // Update button state when disconnected
     document.getElementById("connect-btn").textContent = "Connect";
   }
 }
 
-// Function to properly disconnect the serial port
 async function disconnectSerial() {
   if (port) {
     try {
       if (reader) {
-        // Cancel the reader to allow the reading loop to exit
         await reader.cancel();
       }
-      // Optionally, you could also close the port here,
-      // but the finally block in startReading() will handle it.
       console.log("Port closed.");
       return true;
     } catch (error) {
@@ -96,39 +90,27 @@ async function disconnectSerial() {
   return false;
 }
 
-// Global buffer to accumulate incoming data
 let serialBuffer = "";
 
-// Function to process serial data from the Web Serial API.
 function processSerialData(data) {
-  // Append the new data to our buffer.
   serialBuffer += data;
-
-  // Split the buffer by newline characters.
   const lines = serialBuffer.split("\n");
-
-  // The last element may be an incomplete line, so save it back to the buffer.
   serialBuffer = lines.pop();
 
-  // Process each complete line.
   lines.forEach(line => {
     line = line.trim();
     if (line !== "") {
-      // Split the line into fields based on whitespace.
       const fields = line.split("\t");
       fields.forEach(field => {
-        // Each field should be in the form "KeyX:" or "SWY:" followed by the value.
         const parts = field.split(":");
         if (parts.length === 2) {
           const key = parts[0].trim();
           let value = parts[1].trim();
 
-          // Convert "0" and "1" to boolean text if desired.
           if (value === "0" || value === "1") {
             value = (value === "1") ? "true" : "false";
           }
 
-          // Update the corresponding DOM element if it exists.
           const element = document.getElementById(key);
           if (element) {
             element.textContent = value;
@@ -141,12 +123,9 @@ function processSerialData(data) {
   });
 }
 
-// Function to toggle connection state
 async function toggleConnection() {
   const button = document.getElementById("connect-btn");
-
   if (!port) {
-    // Try to connect
     const success = await connectSerial();
     if (success) {
       button.textContent = "Disconnect";
@@ -154,7 +133,6 @@ async function toggleConnection() {
       console.log("Failed to connect.");
     }
   } else {
-    // Try to disconnect
     const success = await disconnectSerial();
     if (success) {
       button.textContent = "Connect";
@@ -170,9 +148,15 @@ function sendCubeData() {
 }
 
 function readCubeData() {
-  console.log("Reading cube data...");
+  console.log("Reading data...");
   // Implement data reading logic
 }
+
+////////////////////////////////////////////////
+// Three.js Initialization
+////////////////////////////////////////////////
+
+let camera, scene, renderer, controls;
 
 function initThreeJS() {
   const container = document.getElementById('threejs-container');
@@ -187,92 +171,81 @@ function initThreeJS() {
     0.1,
     1000
   );
-  camera.position.set(10, 10, 10); // So we can see the grid
+  camera.position.set(25, 25, 25);
 
-  // Renderer
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  // Create renderer with alpha: true for transparency
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
+  // Make the background fully transparent
+  renderer.setClearColor(0x000000, 0);
   container.appendChild(renderer.domElement);
 
   // OrbitControls
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
-  // By default:
-  //  - LEFT mouse rotates
-  //  - MIDDLE mouse zooms
-  //  - RIGHT mouse pans
 
-  // Create 8×8×8 small cubes
-  const boxes = [];
+  // Create 8×8×8 small spheres
+  const spheres = [];
   for (let x = 0; x < 8; x++) {
     for (let y = 0; y < 8; y++) {
       for (let z = 0; z < 8; z++) {
-        const geometry = new THREE.BoxGeometry(0.4, 0.4, 0.4);
-        const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const cube = new THREE.Mesh(geometry, material);
+        const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+        // Black spheres
+        const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const sphere = new THREE.Mesh(geometry, material);
 
-        // Position them around the origin in a cubic formation
-        cube.position.set(
-          x - 3.5,
-          y - 3.5,
-          z - 3.5
-        );
-        scene.add(cube);
-        boxes.push(cube);
+        sphere.position.set(x - 3.5, y - 3.5, z - 3.5);
+        scene.add(sphere);
+        spheres.push(sphere);
       }
     }
   }
 
-  // left-click to color a cube
-  // We'll do pointerdown so we can check e.button
+  // Raycasting to color spheres on left-click
   renderer.domElement.addEventListener('pointerdown', (e) => {
-    // Only handle left click
-    if (e.button !== 0) return; 
+    if (e.button !== 0) return; // left click only
 
-    // Convert click coords to normalized device coords
+    const rect = renderer.domElement.getBoundingClientRect();
     const mouse = new THREE.Vector2(
-      (e.clientX / renderer.domElement.clientWidth) * 2 - 1,
-      -(e.clientY / renderer.domElement.clientHeight) * 2 + 1
+      ((e.clientX - rect.left) / rect.width) * 2 - 1,
+      -((e.clientY - rect.top) / rect.height) * 2 + 1
     );
 
     const raycaster = new THREE.Raycaster();
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(boxes);
+    const intersects = raycaster.intersectObjects(spheres);
 
     if (intersects.length > 0) {
-      // Use the first object we hit
-      const hitCube = intersects[0].object;
-      // Use the Shoelace color picker's value as the color
-      hitCube.material.color.set(colorPicker.value);
+      const hitSphere = intersects[0].object;
+      hitSphere.material.color.set(colorPicker.value);
+      // Optionally enlarge
+      hitSphere.scale.set(2, 2, 2);
     }
   });
 }
 
 function animate() {
   requestAnimationFrame(animate);
-  controls.update(); // let OrbitControls apply damping, rotation, etc.
+  controls.update();
   renderer.render(scene, camera);
 }
 
-//once everything is loaded
+////////////////////////////////////////////////
+// DOMContentLoaded
+////////////////////////////////////////////////
+
 document.addEventListener("DOMContentLoaded", () => {
-
+  // Button listeners
   const connectButton = document.getElementById("connect-btn");
-  const disconnectButton = document.getElementById("disconnect-btn");
-  const sendButton = document.getElementById('send-btn');
-  const receiveButton = document.getElementById('receive-btn');
+  const sendButton = document.getElementById("send-btn");
+  const receiveButton = document.getElementById("receive-btn");
 
-  if (connectButton) {
-    connectButton.addEventListener("click", toggleConnection);
-  }
-  if (sendButton) {
-    sendButton.addEventListener("click", sendCubeData);
-  }
-  if (receiveButton) {
-    receiveButton.addEventListener("click", readCubeData);
-  }
+  if (connectButton) connectButton.addEventListener("click", toggleConnection);
+  if (sendButton) sendButton.addEventListener("click", sendCubeData);
+  if (receiveButton) receiveButton.addEventListener("click", readCubeData);
 
+  // Init 3D scene
   initThreeJS();
   animate();
-});  
+});
