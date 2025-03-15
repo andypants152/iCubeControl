@@ -18,11 +18,27 @@
   <div id="threejs-container"></div>
   <div class="controls">
     <sl-button-group label="Connection">
-      <sl-button id="connect-btn" size="medium">Connect</sl-button>
-      <sl-button id="disconnect-btn" size="medium">Disconnect</sl-button>
+      <sl-button id="connect-btn" size="medium"><sl-icon slot="prefix" name="usb-plug-fill"></sl-icon>Connect</sl-button>
+      <sl-button id="disconnect-btn" size="medium"><sl-icon slot="prefix" name="usb-plug"></sl-icon>Disconnect</sl-button>
     </sl-button-group>
-    <sl-button id="receive-btn">Receive</sl-button>
-    <sl-button id="send-btn">Send</sl-button>
+    <sl-button id="receive-btn"><sl-icon slot="prefix" name="box-arrow-in-down"></sl-icon>Receive</sl-button>
+    <sl-button id="send-btn"><sl-icon slot="prefix" name="box-arrow-in-up"></sl-icon>Send</sl-button>
+    <sl-button id="diag-btn"><sl-icon slot="prefix" name="cpu"></sl-icon>Diagnostics</sl-button>
+    <sl-dialog label="diagnostics" class="dialog-overview">
+      <div>
+        <p>Key1: <span id="Key1">-</span></p>
+        <p>Key2: <span id="Key2">-</span></p>
+        <p>Key3: <span id="Key3">-</span></p>
+        <p>Key4: <span id="Key4">-</span></p>
+        <p>Key5: <span id="Key5">-</span></p>
+        <p>Key6: <span id="Key6">-</span></p>
+        <p>Key7: <span id="Key7">-</span></p>
+        <p>SW1:  <span id="SW1">-</span></p>
+        <p>SW2:  <span id="SW2">-</span></p>
+      </div>   
+       <sl-button id="close-btn" slot="footer" variant="primary">Close</sl-button>
+    </sl-dialog>
+  
   </div>
 
   <sl-color-picker class="palette" no-format-toggle value="#FFFFFF"
