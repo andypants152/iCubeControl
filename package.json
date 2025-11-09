@@ -4,8 +4,8 @@
   "description": "3D8RGB Controller",
   "main": "main.js",
   "scripts": {
-    "start": "webpack serve",
-    "build": "webpack"
+    "start": "webpack serve --mode development",
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
