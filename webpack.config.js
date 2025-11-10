@@ -13,7 +13,7 @@ module.exports = (env, argv = {}) => {
       filename: isProduction ? 'assets/[name].[contenthash].js' : 'assets/[name].js',
       path: path.resolve(__dirname, 'dist'),
       clean: true,
-      publicPath: '/',
+      publicPath: '',
     },
     devtool: isProduction ? 'source-map' : 'eval-cheap-module-source-map',
     devServer: {
