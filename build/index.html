@@ -43,6 +43,49 @@
     </sl-dialog>
   
   </div>
+  <div class="life-controls">
+    <sl-button id="life-toggle" size="small" variant="primary">Start Life</sl-button>
+    <sl-button id="life-step" size="small">Step</sl-button>
+    <sl-button id="life-random" size="small">Randomize</sl-button>
+    <sl-button id="life-clear" size="small" variant="default">Clear</sl-button>
+  </div>
+
+  <div class="slice-editor">
+    <sl-details summary="Slice Editor" open>
+      <sl-card>
+        <div class="slice-wrapper">
+          <div class="slice-controls">
+            <sl-radio-group label="Axis" value="z" id="slice-axis" size="small">
+              <sl-radio-button value="x">X</sl-radio-button>
+              <sl-radio-button value="y">Y</sl-radio-button>
+              <sl-radio-button value="z">Z</sl-radio-button>
+            </sl-radio-group>
+            <sl-select id="slice-layer" label="Layer" value="0">
+              <sl-option value="0">Layer 0</sl-option>
+              <sl-option value="1">Layer 1</sl-option>
+              <sl-option value="2">Layer 2</sl-option>
+              <sl-option value="3">Layer 3</sl-option>
+              <sl-option value="4">Layer 4</sl-option>
+              <sl-option value="5">Layer 5</sl-option>
+              <sl-option value="6">Layer 6</sl-option>
+              <sl-option value="7">Layer 7</sl-option>
+            </sl-select>
+            <sl-select id="paint-mode" label="Mode" value="row">
+              <sl-option value="row">Row</sl-option>
+              <sl-option value="column">Column</sl-option>
+            </sl-select>
+          </div>
+          <div class="slice-grid-area">
+            <div id="slice-grid" role="grid" aria-label="8 by 8 slice"></div>
+            <div class="slice-actions">
+              <sl-button id="fill-slice" size="small" variant="primary">Fill slice</sl-button>
+              <sl-button id="clear-slice" size="small" variant="default">Clear slice</sl-button>
+            </div>
+          </div>
+        </div>
+      </sl-card>
+    </sl-details>
+  </div>
 
   <sl-color-picker class="palette" no-format-toggle value="#FFFFFF"
     swatches="#FF0000; #00FF00; #0000FF; #FFFF00; #00FFFF; #FF00FF; #FFFFFF; #000000;"></sl-color-picker>

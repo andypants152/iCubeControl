@@ -28,12 +28,127 @@ body {
     z-index: 100;
 }
 
+.life-controls {
+    position: absolute;
+    bottom: 70px;
+    left: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    pointer-events: auto;
+    z-index: 100;
+}
+
 .palette {
     position: absolute;
     bottom: 10px;
     right: 30px;
     pointer-events: auto; 
     z-index: 100;
+}
+
+.slice-editor {
+    position: absolute;
+    bottom: 150px;
+    right: 30px;
+    width: 620px;
+    pointer-events: auto;
+    z-index: 100;
+}
+
+.slice-editor sl-details::part(base) {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+}
+
+.slice-editor sl-card::part(base) {
+    background: transparent;
+    border: none;
+    padding-top: 0.5rem;
+}
+
+.slice-wrapper {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+}
+
+.slice-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+
+.slice-controls sl-select,
+.slice-controls sl-radio-group {
+    width: 100%;
+}
+
+.slice-grid-area {
+    flex: 1.4;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.slice-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+#slice-grid {
+    margin-top: 0.75rem;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 4px;
+}
+
+.slice-cell {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.slice-cell:hover,
+.slice-cell:focus-visible {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.slice-cell.is-active {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 768px) {
+    .slice-editor {
+        width: auto;
+        right: 10px;
+        left: 10px;
+        bottom: 150px;
+    }
+
+    .life-controls {
+        left: 10px;
+        right: 10px;
+        bottom: 120px;
+    }
+
+    .slice-wrapper {
+        flex-direction: column;
+    }
+
+    .slice-grid-area {
+        width: 100%;
+    }
 }
 
 #threejs-container {
